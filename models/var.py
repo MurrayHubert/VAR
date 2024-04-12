@@ -13,7 +13,7 @@ from models.vqvae import VQVAE, VectorQuantizer2
 from huggingface_hub import PyTorchModelHubMixin
 
 
-class SharedAdaLin(nn.Linear):
+class SharedAdaLin(nn.Linear):  # 共享适应线性层
     def forward(self, cond_BD):
         C = self.weight.shape[0] // 6
         return super().forward(cond_BD).view(-1, 1, 6, C)   # B16C
@@ -31,7 +31,7 @@ class VAR(nn.Module):
         super().__init__()
         # 0. hyperparameters
         assert embed_dim % num_heads == 0
-        self.Cvae, self.V = vae_local.Cvae, vae_local.vocab_size
+        self.Cvae, self.V = vae_local.Cvae, vae_local.vocab_size  # V:Vocabulary
         self.depth, self.C, self.D, self.num_heads = depth, embed_dim, embed_dim, num_heads
         self.using_aln, self.aln_init, self.aln_gamma_init, self.layer_scale = aln >= 0, aln, aln_gamma_init, layer_scale
         if self.using_aln and layer_scale != -1:
@@ -41,11 +41,11 @@ class VAR(nn.Module):
         self.prog_si = -1   # progressive training
         
         self.patch_nums: Tuple[int] = patch_nums
-        self.L = sum(pn ** 2 for pn in self.patch_nums)
+        self.L = sum(pn ** 2 for pn in self.patch_nums)  
         self.first_l = self.patch_nums[0] ** 2
         self.begin_ends = []
         cur = 0
-        for i, pn in enumerate(self.patch_nums):
+        for i, pn in enumerate(self.patch_nums):  # pn: patch_num
             self.begin_ends.append((cur, cur+pn ** 2))
             cur += pn ** 2
         
